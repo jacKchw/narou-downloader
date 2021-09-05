@@ -8,6 +8,7 @@ import requests
 import datetime
 
 base_url = "https://ncode.syosetu.com/"
+output_path = "download"
 
 
 class Novel:
@@ -16,7 +17,7 @@ class Novel:
         self.url = base_url + novel_id + "/"
         self.info = self.__search()
         self.title = re.sub(r'[<>:/"|?*\\]', "", str(self.info["Title"]))
-        self.folderName = self.title
+        self.folderName = os.path.join(output_path, self.title)
 
         self.chapter_dig = len(str(self.info["Chapter Number"]))
 
@@ -111,16 +112,20 @@ class Novel:
         return {"chapter": chapter, "subtitle": subtitle, "text": text}
 
     def __create_folder(self, sep):
+        try:
+            os.mkdir(output_path)
+        except:
+            pass
+
         # create folder
         count = 0
         while True:
             try:
-                if count == 0:
-                    os.mkdir(self.folderName)
-                else:
-                    name = self.title + "_" + str(count).zfill(2)
-                    os.mkdir(name)
-                    self.folderName = name
+                if count != 0:
+                    self.folderName = os.path.join(
+                        output_path, self.title + "_" + str(count).zfill(2)
+                    )
+                os.mkdir(self.folderName)
                 break
             except FileExistsError:
                 count += 1
@@ -131,11 +136,11 @@ class Novel:
         )
         txt += "\n\n\n"
         path = (
-            self.folderName + "/info"
+            os.path.join(self.folderName, "info.txt")
             if sep
-            else self.folderName + "/" + self.folderName
+            else os.path.join(self.folderName, self.title + ".txt")
         )
-        with codecs.open(path + ".txt", "w", encoding="utf8") as f:
+        with codecs.open(path, "w", encoding="utf8") as f:
             f.write(txt)
 
     def __write_txt(self, d, sep):
@@ -145,12 +150,12 @@ class Novel:
             subtitle = re.sub(r'[<>:/"|?*\\]', "", str(d["subtitle"]))
             fileName = chapterNum + "_" + subtitle
             with codecs.open(
-                self.folderName + "/" + fileName + ".txt", "w", encoding="utf8"
+                os.path.join(self.folderName, fileName + ".txt"), "w", encoding="utf8"
             ) as f:
                 f.write(d["text"])
         else:
             with codecs.open(
-                self.folderName + "/" + self.folderName + ".txt", "a", encoding="utf8"
+                os.path.join(self.folderName, self.title + ".txt"), "a", encoding="utf8"
             ) as f:
                 f.write(
                     str(d["chapter"])
