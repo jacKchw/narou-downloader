@@ -1,8 +1,4 @@
-import sys
-
-sys.path.append(".")
-
-from novel import Novel
+from narou_downloader import Novel
 
 if __name__ == "__main__":
     n = Novel("n1166fi")
