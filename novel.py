@@ -95,7 +95,11 @@ class Novel:
         return info
 
     def __get_soup(self, page_url):
-        html = urllib.request.urlopen(page_url)
+        req = urllib.request.Request(
+            page_url,
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        html = urllib.request.urlopen(req)
         soup = BeautifulSoup(html, "html.parser")
         return soup
 
