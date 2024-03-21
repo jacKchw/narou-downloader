@@ -1,1 +1,1 @@
-from novel import Novel
+from .novel import Novel
