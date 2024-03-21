@@ -8,7 +8,6 @@ import requests
 import datetime
 
 base_url = "https://ncode.syosetu.com/"
-output_path = "download"
 
 
 class Novel:
@@ -17,14 +16,14 @@ class Novel:
         self.url = base_url + novel_id + "/"
         self.info = self.__search()
         self.title = re.sub(r'[<>:/"|?*\\]', "", str(self.info["Title"]))
-        self.folderName = os.path.join(output_path, self.title)
-
+        self.folderName = ""
+        self.outputPath = ""
         self.chapter_dig = len(str(self.info["Chapter Number"]))
 
     def __repr__(self):
         return "Novel" + str(self.info)
 
-    def save_all_novel(self, sep=False, chapterRange=None):
+    def save_all_novel(self, outputPath, sep=False, chapterRange=None):
         """
         Parameters
         ----------
@@ -38,6 +37,8 @@ class Novel:
         None.
 
         """
+        self.outputPath = outputPath
+        self.folderName = os.path.join(outputPath, self.title)
         self.__create_folder(sep)
         # all novel text
         if type(chapterRange) != range:
@@ -117,7 +118,7 @@ class Novel:
 
     def __create_folder(self, sep):
         try:
-            os.mkdir(output_path)
+            os.makedirs(self.outputPath, exist_ok=True)
         except:
             pass
 
@@ -127,9 +128,9 @@ class Novel:
             try:
                 if count != 0:
                     self.folderName = os.path.join(
-                        output_path, self.title + "_" + str(count).zfill(2)
+                        self.outputPath, self.title + "_" + str(count).zfill(2)
                     )
-                os.mkdir(self.folderName)
+                os.makedirs(self.folderName, exist_ok=True)
                 break
             except FileExistsError:
                 count += 1
